@@ -1,0 +1,19 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Generated build output
+**/build/
+**/target/
+**/.dart_tool/
+**/.pub-cache/
+**/.gradle/
+
+# Local IDE and machine-specific files
+**/.idea/
+**/.vscode/
+**/*.iml
+**/local.properties
+**/.DS_Store
+Thumbs.db

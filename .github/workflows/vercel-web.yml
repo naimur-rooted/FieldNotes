@@ -1,0 +1,61 @@
+name: Build and Deploy Flutter Web
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'app/**'
+      - '.github/workflows/vercel-web.yml'
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - name: Validate deployment configuration
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          for name in API_BASE_URL VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::GitHub Actions secret $name must be configured."
+              exit 1
+            fi
+          done
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - name: Build Flutter web app
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: flutter build web --release --dart-define=API_BASE_URL="$API_BASE_URL"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Link Vercel project
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npm install --global vercel
+          vercel deploy --prod --yes --token "$VERCEL_TOKEN"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: app/build/web
