@@ -21,8 +21,8 @@ Keep `backend/` and `app/` as two folders in ONE repo (monorepo).
    - https://dashboard.render.com → New → **PostgreSQL** → Free plan → Create.
    - Open it → copy the **External Database URL**, looks like:
      `postgresql://user:pass@host:5432/dbname`
-   - Convert to JDBC form (just add prefix + ssl):
-     `jdbc:postgresql://user:pass@host:5432/dbname?sslmode=require`
+   - Convert to PostgreSQL JDBC form (credentials in query params):
+     `jdbc:postgresql://host:5432/dbname?user=user&password=pass&sslmode=require`
 
 2. **Create Web Service:**
    - New → **Web Service** → select your repo.
