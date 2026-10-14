@@ -17,3 +17,8 @@
 **/local.properties
 **/.DS_Store
 Thumbs.db
+
+# Documentation and assignment task files
+task.pdf
+DEPLOY.md
+deployment.md
