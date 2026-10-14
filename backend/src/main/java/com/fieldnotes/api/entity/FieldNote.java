@@ -32,7 +32,7 @@ public class FieldNote {
     @Column(nullable = false, length = 30)
     private String status = "OPEN";
 
-    @Column(length = 500)
+    @Column(columnDefinition = "TEXT")
     private String photoPath;
 
     @Column(nullable = false, updatable = false)

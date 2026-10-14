@@ -178,6 +178,7 @@ class SyncRepository {
           'location': n.location,
           'dateTime': (n.dateTime ?? n.updatedAt).toUtc().toIso8601String(),
           'status': n.status,
+          if (n.photoLocalPath != null) 'photoPath': n.photoLocalPath,
         };
         if (n.serverId == null) {
           final j = await api.createNote(body);
@@ -229,7 +230,13 @@ class SyncRepository {
       if (existing != null && existing.dirty) continue;
       final siteLocal = siteLocalByServer[j['siteId'] as int] ?? 'srv-${j['siteId']}';
       final fromSrv = FieldNote.fromServer({...j, 'localId': existing?.localId ?? 'srv-$id'});
-      await local.putNote(fromSrv.copyWith(siteLocalId: siteLocal));
+      final preservedPhoto = (fromSrv.photoLocalPath != null && fromSrv.photoLocalPath!.isNotEmpty)
+          ? fromSrv.photoLocalPath
+          : existing?.photoLocalPath;
+      await local.putNote(fromSrv.copyWith(
+        siteLocalId: siteLocal,
+        photoLocalPath: preservedPhoto,
+      ));
     }
   }
 

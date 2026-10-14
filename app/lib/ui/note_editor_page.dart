@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -82,13 +83,41 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
 
   Future<void> _pickPhoto(ImageSource source) async {
     try {
-      final img = await ImagePicker().pickImage(source: source, maxWidth: 1600);
-      if (img != null) setState(() => photoPath = img.path);
+      final img = await ImagePicker().pickImage(source: source, maxWidth: 1200, imageQuality: 85);
+      if (img != null) {
+        if (kIsWeb) {
+          final bytes = await img.readAsBytes();
+          final dataUrl = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+          setState(() => photoPath = dataUrl);
+        } else {
+          setState(() => photoPath = img.path);
+        }
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(behavior: SnackBarBehavior.floating, content: Text('Photo error: $e')));
       }
     }
+  }
+
+  Widget _buildPhotoWidget(String path, {double? width, double? height}) {
+    if (path.startsWith('data:image')) {
+      try {
+        final base64Str = path.contains(',') ? path.split(',').last : path;
+        final bytes = base64Decode(base64Str);
+        return Image.memory(bytes, width: width, height: height, fit: BoxFit.cover);
+      } catch (_) {}
+    } else if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, width: width, height: height, fit: BoxFit.cover);
+    } else if (!kIsWeb) {
+      return Image.file(File(path), width: width, height: height, fit: BoxFit.cover);
+    }
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey.shade100,
+      child: const Icon(Icons.broken_image_rounded, size: 28, color: Colors.grey),
+    );
   }
 
   @override
@@ -295,13 +324,25 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
                           ),
                         ],
                       ),
-                      if (photoPath != null) ...[
+                      if (photoPath != null && photoPath!.isNotEmpty) ...[
                         const SizedBox(height: 12),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: kIsWeb
-                              ? Image.network(photoPath!, height: 160, width: double.infinity, fit: BoxFit.cover)
-                              : Image.file(File(photoPath!), height: 160, width: double.infinity, fit: BoxFit.cover),
+                        Stack(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: _buildPhotoWidget(photoPath!, height: 180, width: double.infinity),
+                            ),
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: IconButton.filled(
+                                style: IconButton.styleFrom(backgroundColor: Colors.black54),
+                                icon: const Icon(Icons.close_rounded, size: 18, color: Colors.white),
+                                tooltip: 'Remove Photo',
+                                onPressed: () => setState(() => photoPath = null),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ],

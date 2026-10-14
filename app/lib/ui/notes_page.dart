@@ -1,3 +1,4 @@
+import 'dart:convert' show base64Decode;
 import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
@@ -300,31 +301,7 @@ class _NotesPageState extends State<NotesPage> {
                                             children: [
                                               ClipRRect(
                                                 borderRadius: BorderRadius.circular(8),
-                                                child: kIsWeb
-                                                    ? Image.network(
-                                                        n.photoLocalPath!,
-                                                        width: 44,
-                                                        height: 44,
-                                                        fit: BoxFit.cover,
-                                                        errorBuilder: (context, error, stackTrace) => Container(
-                                                          width: 44,
-                                                          height: 44,
-                                                          color: Colors.grey.shade100,
-                                                          child: const Icon(Icons.broken_image, size: 20, color: Colors.grey),
-                                                        ),
-                                                      )
-                                                    : Image.file(
-                                                        File(n.photoLocalPath!),
-                                                        width: 44,
-                                                        height: 44,
-                                                        fit: BoxFit.cover,
-                                                        errorBuilder: (context, error, stackTrace) => Container(
-                                                          width: 44,
-                                                          height: 44,
-                                                          color: Colors.grey.shade100,
-                                                          child: const Icon(Icons.broken_image, size: 20, color: Colors.grey),
-                                                        ),
-                                                      ),
+                                                child: _buildNoteThumbnail(n.photoLocalPath!),
                                               ),
                                               const SizedBox(width: 8),
                                               Container(
@@ -518,4 +495,38 @@ class _NotesPageState extends State<NotesPage> {
       ),
     );
   }
+
+  Widget _buildNoteThumbnail(String path) {
+    if (path.startsWith('data:image')) {
+      try {
+        final base64Str = path.contains(',') ? path.split(',').last : path;
+        final bytes = base64Decode(base64Str);
+        return Image.memory(bytes, width: 44, height: 44, fit: BoxFit.cover);
+      } catch (_) {}
+    } else if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _fallbackThumbnail(),
+      );
+    } else if (!kIsWeb) {
+      return Image.file(
+        File(path),
+        width: 44,
+        height: 44,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => _fallbackThumbnail(),
+      );
+    }
+    return _fallbackThumbnail();
+  }
+
+  Widget _fallbackThumbnail() => Container(
+        width: 44,
+        height: 44,
+        color: Colors.grey.shade100,
+        child: const Icon(Icons.broken_image_rounded, size: 20, color: Colors.grey),
+      );
 }

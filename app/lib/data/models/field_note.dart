@@ -97,6 +97,7 @@ class FieldNote {
         location: (j['location'] ?? '') as String,
         dateTime: j['dateTime'] == null ? null : DateTime.tryParse(j['dateTime'] as String),
         status: (j['status'] ?? 'OPEN') as String,
+        photoLocalPath: (j['photoPath'] as String?)?.isNotEmpty == true ? (j['photoPath'] as String) : null,
         updatedAt: DateTime.tryParse(j['updatedAt'] as String? ?? '') ?? DateTime.now(),
         dirty: false, deleted: false,
       );

@@ -10,4 +10,5 @@ public record FieldNoteRequest(
         String description,
         String location,
         Instant dateTime,
-        String status) {}
+        String status,
+        String photoPath) {}

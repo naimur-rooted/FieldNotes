@@ -36,6 +36,7 @@ public class FieldNoteController {
         m.put("location", n.getLocation() == null ? "" : n.getLocation());
         m.put("dateTime", n.getDateTime() == null ? null : n.getDateTime().toString());
         m.put("status", n.getStatus());
+        m.put("photoPath", n.getPhotoPath() == null ? "" : n.getPhotoPath());
         m.put("createdAt", n.getCreatedAt().toString());
         m.put("updatedAt", n.getUpdatedAt().toString());
         return m;
@@ -63,6 +64,7 @@ public class FieldNoteController {
         n.setTitle(req.title()); n.setDescription(req.description());
         n.setLocation(req.location()); n.setDateTime(req.dateTime());
         n.setStatus(req.status() == null || req.status().isBlank() ? "OPEN" : req.status());
+        n.setPhotoPath(req.photoPath());
         n = notes.save(n);
         return toMap(notes.findByIdAndUserWithRelations(n.getId(), userId).orElse(n));
     }
@@ -83,6 +85,7 @@ public class FieldNoteController {
         n.setDescription(req.description()); n.setLocation(req.location());
         n.setDateTime(req.dateTime());
         if (req.status() != null && !req.status().isBlank()) n.setStatus(req.status());
+        if (req.photoPath() != null) n.setPhotoPath(req.photoPath());
         notes.save(n);
         return toMap(notes.findByIdAndUserWithRelations(id, userId).orElse(n));
     }
