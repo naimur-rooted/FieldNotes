@@ -1,3 +1,5 @@
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/notes/note_bloc.dart';
@@ -290,6 +292,65 @@ class _NotesPageState extends State<NotesPage> {
                                               color: Colors.grey.shade700,
                                               height: 1.3,
                                             ),
+                                          ),
+                                        ],
+                                        if (n.photoLocalPath != null && n.photoLocalPath!.isNotEmpty) ...[
+                                          const SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: kIsWeb
+                                                    ? Image.network(
+                                                        n.photoLocalPath!,
+                                                        width: 44,
+                                                        height: 44,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context, error, stackTrace) => Container(
+                                                          width: 44,
+                                                          height: 44,
+                                                          color: Colors.grey.shade100,
+                                                          child: const Icon(Icons.broken_image, size: 20, color: Colors.grey),
+                                                        ),
+                                                      )
+                                                    : Image.file(
+                                                        File(n.photoLocalPath!),
+                                                        width: 44,
+                                                        height: 44,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder: (context, error, stackTrace) => Container(
+                                                          width: 44,
+                                                          height: 44,
+                                                          color: Colors.grey.shade100,
+                                                          child: const Icon(Icons.broken_image, size: 20, color: Colors.grey),
+                                                        ),
+                                                      ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFEEF2FF),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  border: Border.all(color: const Color(0xFFC7D2FE)),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.photo_camera_rounded, size: 13, color: Colors.indigo.shade600),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      'Photo Evidence',
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Colors.indigo.shade700,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                         const SizedBox(height: 12),
