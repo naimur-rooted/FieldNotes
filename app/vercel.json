@@ -1,12 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "build/web/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/$1" }
+  "outputDirectory": "build/web",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
