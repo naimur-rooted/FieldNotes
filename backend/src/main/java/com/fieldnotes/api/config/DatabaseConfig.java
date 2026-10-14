@@ -19,12 +19,19 @@ public class DatabaseConfig {
     @Bean
     @Primary
     public DataSource dataSource(Environment env) {
-        String rawUrl = env.getProperty("JDBC_DATABASE_URL");
+        String rawUrl = null;
+        try {
+            rawUrl = env.getProperty("JDBC_DATABASE_URL");
+        } catch (Exception ignored) {}
         if (rawUrl == null || rawUrl.isBlank()) {
-            rawUrl = env.getProperty("DATABASE_URL");
+            try {
+                rawUrl = env.getProperty("DATABASE_URL");
+            } catch (Exception ignored) {}
         }
         if (rawUrl == null || rawUrl.isBlank()) {
-            rawUrl = env.getProperty("spring.datasource.url");
+            try {
+                rawUrl = env.getProperty("spring.datasource.url");
+            } catch (Exception ignored) {}
         }
 
         String username = env.getProperty("spring.datasource.username");
