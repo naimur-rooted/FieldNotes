@@ -11,5 +11,14 @@ export PATH="$PATH:$HOME/_flutter/bin"
 flutter --version
 
 echo "Building Flutter Web..."
+if [ -d "app" ]; then
+  cd app
+fi
+
 flutter pub get
-flutter build web --release --dart-define=API_BASE_URL="${API_BASE_URL:-https://fieldnotes-api.onrender.com}"
+flutter build web --release --dart-define=API_BASE_URL="${API_BASE_URL:-https://fieldnotes-api-2sp0.onrender.com}"
+
+if [ -d "../build" ] || [ -f "../build.sh" ]; then
+  mkdir -p ../build
+  cp -r build/web ../build/web || true
+fi
