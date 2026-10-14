@@ -47,6 +47,9 @@ public class FieldNoteController {
             @RequestParam(required = false, name = "q") String q) {
         String query = (q == null || q.isBlank()) ? null : q.trim();
         String st = (status == null || status.isBlank()) ? null : status.trim();
+        if (siteId == null && st == null && query == null) {
+            return notes.findAllByUserWithRelations(uid(auth)).stream().map(this::toMap).toList();
+        }
         return notes.search(uid(auth), siteId, st, query).stream().map(this::toMap).toList();
     }
     @PostMapping

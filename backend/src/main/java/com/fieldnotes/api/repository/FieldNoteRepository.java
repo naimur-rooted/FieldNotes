@@ -17,12 +17,12 @@ public interface FieldNoteRepository extends JpaRepository<FieldNote, Long> {
     Optional<FieldNote> findByIdAndUserWithRelations(@Param("id") Long id, @Param("userId") Long userId);
 
     @Query("SELECT n FROM FieldNote n JOIN FETCH n.site s JOIN FETCH s.customer " +
-           "WHERE n.user.id = :userId AND (:siteId IS NULL OR s.id = :siteId) " +
-           "AND (:status IS NULL OR n.status = :status) " +
-           "AND (:q IS NULL OR LOWER(n.title) LIKE LOWER(CONCAT('%', :q, '%')) " +
-           "OR LOWER(n.description) LIKE LOWER(CONCAT('%', :q, '%')) " +
-           "OR LOWER(s.name) LIKE LOWER(CONCAT('%', :q, '%')) " +
-           "OR LOWER(s.customer.name) LIKE LOWER(CONCAT('%', :q, '%'))) " +
+           "WHERE n.user.id = :userId AND (cast(:siteId as long) IS NULL OR s.id = :siteId) " +
+           "AND (cast(:status as string) IS NULL OR n.status = :status) " +
+           "AND (cast(:q as string) IS NULL OR LOWER(n.title) LIKE LOWER(CONCAT('%', cast(:q as string), '%')) " +
+           "OR LOWER(n.description) LIKE LOWER(CONCAT('%', cast(:q as string), '%')) " +
+           "OR LOWER(s.name) LIKE LOWER(CONCAT('%', cast(:q as string), '%')) " +
+           "OR LOWER(s.customer.name) LIKE LOWER(CONCAT('%', cast(:q as string), '%'))) " +
            "ORDER BY n.updatedAt DESC")
     List<FieldNote> search(@Param("userId") Long userId,
                            @Param("siteId") Long siteId,
