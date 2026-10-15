@@ -5,14 +5,20 @@ import '../../core/config.dart';
 
 class ApiService {
   String? _token;
+  String? _userName;
+  String? _userEmail;
 
   Future<void> loadToken() async {
     final p = await SharedPreferences.getInstance();
     _token = p.getString('token');
+    _userName = p.getString('userName');
+    _userEmail = p.getString('userEmail');
   }
 
   Future<void> saveAuth(String token, int userId, String name, String email) async {
     _token = token;
+    _userName = name;
+    _userEmail = email;
     final p = await SharedPreferences.getInstance();
     await p.setString('token', token);
     await p.setInt('userId', userId);
@@ -22,6 +28,8 @@ class ApiService {
 
   Future<void> clearAuth() async {
     _token = null;
+    _userName = null;
+    _userEmail = null;
     final p = await SharedPreferences.getInstance();
     await p.remove('token');
     await p.remove('userId');
@@ -31,6 +39,8 @@ class ApiService {
 
   bool get isLoggedIn => _token != null;
   String? get token => _token;
+  String? get userName => _userName;
+  String? get userEmail => _userEmail;
 
   Map<String, String> get _headers => {
         'Content-Type': 'application/json',

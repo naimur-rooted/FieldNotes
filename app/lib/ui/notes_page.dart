@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/notes/note_bloc.dart';
 import 'note_editor_page.dart';
+import 'widgets/app_top_actions.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({super.key});
@@ -45,9 +46,8 @@ class _NotesPageState extends State<NotesPage> {
           ],
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            child: IconButton.filledTonal(
+          AppTopActions(
+            leadingAction: IconButton.filledTonal(
               icon: const Icon(Icons.sync_rounded),
               tooltip: 'Sync with Cloud',
               onPressed: () => context.read<NoteBloc>().add(NotesSync()),

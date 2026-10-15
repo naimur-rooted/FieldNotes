@@ -27,8 +27,112 @@ class FieldNotesApp extends StatelessWidget {
   final ApiService api;
   final SyncRepository repo;
   final SettingsService settings;
-  const FieldNotesApp(
-      {super.key, required this.local, required this.api, required this.repo, required this.settings});
+
+  const FieldNotesApp({
+    super.key,
+    required this.local,
+    required this.api,
+    required this.repo,
+    required this.settings,
+  });
+
+  ThemeData _buildTheme(Color primary, Color secondary, Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary,
+        brightness: brightness,
+        primary: primary,
+        secondary: secondary,
+        tertiary: const Color(0xFF10B981),
+        surface: isDark ? const Color(0xFF1E293B) : Colors.white,
+      ),
+      scaffoldBackgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      appBarTheme: AppBarTheme(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        foregroundColor: isDark ? Colors.white : const Color(0xFF1E293B),
+        elevation: 0,
+        centerTitle: false,
+        scrolledUnderElevation: 1,
+        titleTextStyle: TextStyle(
+          color: isDark ? Colors.white : const Color(0xFF1E293B),
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          letterSpacing: -0.3,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        elevation: 1,
+        shadowColor: isDark
+            ? Colors.black.withValues(alpha: 0.3)
+            : Colors.black.withValues(alpha: 0.08),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+              color: isDark ? const Color(0xFF334155) : Colors.grey.shade200,
+              width: 1),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: isDark
+            ? const Color(0xFF334155).withValues(alpha: 0.45)
+            : Colors.grey.shade50,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+              color: isDark ? const Color(0xFF475569) : Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+              color: isDark ? const Color(0xFF334155) : Colors.grey.shade200),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: primary, width: 1.8),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+        ),
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        indicatorColor: primary.withValues(alpha: isDark ? 0.28 : 0.12),
+        elevation: 3,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return TextStyle(
+                fontSize: 12, fontWeight: FontWeight.bold, color: primary);
+          }
+          return TextStyle(
+              fontSize: 12,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B));
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return IconThemeData(color: primary);
+          }
+          return IconThemeData(
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B));
+        }),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,101 +144,32 @@ class FieldNotesApp extends StatelessWidget {
         BlocProvider(create: (_) => NoteBloc(repo)),
         BlocProvider(create: (_) => SettingsBloc(settings)..add(SettingsLoad())),
       ],
-      child: MaterialApp(
-        title: 'Field Notes',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF4F46E5),
-            primary: const Color(0xFF4F46E5),
-            secondary: const Color(0xFF0EA5E9),
-            tertiary: const Color(0xFF10B981),
-            surface: Colors.white,
-          ),
-          scaffoldBackgroundColor: const Color(0xFFF8FAFC),
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            foregroundColor: Color(0xFF1E293B),
-            elevation: 0,
-            centerTitle: false,
-            scrolledUnderElevation: 1,
-            titleTextStyle: TextStyle(
-              color: Color(0xFF1E293B),
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              letterSpacing: -0.3,
+      child: BlocBuilder<SettingsBloc, SettingsState>(
+        builder: (context, settingsState) {
+          return MaterialApp(
+            title: 'Field Notes',
+            debugShowCheckedModeBanner: false,
+            themeMode: settingsState.themeMode,
+            theme: _buildTheme(settingsState.primaryColor,
+                settingsState.secondaryColor, Brightness.light),
+            darkTheme: _buildTheme(settingsState.primaryColor,
+                settingsState.secondaryColor, Brightness.dark),
+            home: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                if (state.checking) {
+                  return Scaffold(
+                    body: Center(
+                      child: CircularProgressIndicator(
+                          color: settingsState.primaryColor),
+                    ),
+                  );
+                }
+                return state.loggedIn ? const HomePage() : const AuthPage();
+              },
             ),
-          ),
-          cardTheme: CardThemeData(
-            color: Colors.white,
-            elevation: 1,
-            shadowColor: Colors.black.withValues(alpha: 0.08),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: Colors.grey.shade200, width: 1),
-            ),
-          ),
-          inputDecorationTheme: InputDecorationTheme(
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF4F46E5), width: 1.8),
-            ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4F46E5),
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-            ),
-          ),
-          navigationBarTheme: NavigationBarThemeData(
-            backgroundColor: Colors.white,
-            indicatorColor: const Color(0xFFEEF2FF),
-            elevation: 3,
-            labelTextStyle: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return const TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF4F46E5));
-              }
-              return const TextStyle(fontSize: 12, color: Color(0xFF64748B));
-            }),
-            iconTheme: WidgetStateProperty.resolveWith((states) {
-              if (states.contains(WidgetState.selected)) {
-                return const IconThemeData(color: Color(0xFF4F46E5));
-              }
-              return const IconThemeData(color: Color(0xFF64748B));
-            }),
-          ),
-        ),
-        home: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state.checking) {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(color: Color(0xFF4F46E5)),
-                ),
-              );
-            }
-            return state.loggedIn ? const HomePage() : const AuthPage();
-          },
-        ),
+          );
+        },
       ),
     );
   }
 }
-

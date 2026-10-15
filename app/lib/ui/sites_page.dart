@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/customers/customer_bloc.dart';
 import '../blocs/sites/site_bloc.dart';
+import 'widgets/app_top_actions.dart';
 
 class SitesPage extends StatelessWidget {
   const SitesPage({super.key});
@@ -25,12 +26,12 @@ class SitesPage extends StatelessWidget {
           ],
         ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            child: IconButton.filledTonal(
+          AppTopActions(
+            leadingAction: IconButton.filledTonal(
               icon: const Icon(Icons.sync_rounded),
               tooltip: 'Sync',
-              onPressed: () => context.read<SiteBloc>().add(SitesSync())),
+              onPressed: () => context.read<SiteBloc>().add(SitesSync()),
+            ),
           ),
         ],
       ),

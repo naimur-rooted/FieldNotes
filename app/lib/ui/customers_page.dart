@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/auth/auth_bloc.dart';
 import '../blocs/customers/customer_bloc.dart';
+import 'widgets/app_top_actions.dart';
 
 class CustomersPage extends StatelessWidget {
   const CustomersPage({super.key});
@@ -40,18 +40,13 @@ class CustomersPage extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton.filledTonal(
-            icon: const Icon(Icons.sync_rounded),
-            tooltip: 'Sync',
-            onPressed: () => context.read<CustomerBloc>().add(CustomersSync()),
+          AppTopActions(
+            leadingAction: IconButton.filledTonal(
+              icon: const Icon(Icons.sync_rounded),
+              tooltip: 'Sync',
+              onPressed: () => context.read<CustomerBloc>().add(CustomersSync()),
+            ),
           ),
-          const SizedBox(width: 4),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Color(0xFFEF4444)),
-            tooltip: 'Sign Out',
-            onPressed: () => context.read<AuthBloc>().add(AuthLogout()),
-          ),
-          const SizedBox(width: 8),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
