@@ -53,6 +53,30 @@ class ApiService {
     throw Exception(_msg(r, 'Login failed'));
   }
 
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}));
+    if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
+    throw Exception(_msg(r, 'Failed to send verification code'));
+  }
+
+  Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
+    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'otp': otp}));
+    if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
+    throw Exception(_msg(r, 'Verification failed'));
+  }
+
+  Future<Map<String, dynamic>> resetPassword(String email, String otp, String newPassword) async {
+    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'otp': otp, 'newPassword': newPassword}));
+    if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
+    throw Exception(_msg(r, 'Failed to reset password'));
+  }
+
   Future<List<dynamic>> getCustomers() async {
     final r = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/customers'), headers: _headers);
     if (r.statusCode == 200) return jsonDecode(r.body) as List;
