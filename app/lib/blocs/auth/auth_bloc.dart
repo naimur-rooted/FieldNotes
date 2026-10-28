@@ -61,10 +61,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final j = await api.login(e.email, e.password);
         await api.saveAuth(j['token'] as String, (j['userId'] as num).toInt(),
             j['name'] as String, j['email'] as String);
-        try {
-          await repo.pull();
-        } catch (_) {}
         emit(state.copyWith(loading: false, loggedIn: true));
+        repo.pull().ignore();
       } catch (err) {
         emit(state.copyWith(loading: false, error: err.toString().replaceFirst('Exception: ', '')));
       }
@@ -76,6 +74,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await api.saveAuth(j['token'] as String, (j['userId'] as num).toInt(),
             j['name'] as String, j['email'] as String);
         emit(state.copyWith(loading: false, loggedIn: true));
+        repo.pull().ignore();
       } catch (err) {
         emit(state.copyWith(loading: false, error: err.toString().replaceFirst('Exception: ', '')));
       }
