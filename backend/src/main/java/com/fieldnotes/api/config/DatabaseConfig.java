@@ -89,6 +89,10 @@ public class DatabaseConfig {
         } else if (rawUrl.startsWith("postgresql://")) {
             rawUrl = "jdbc:postgresql://" + rawUrl.substring("postgresql://".length());
             driver = "org.postgresql.Driver";
+        } else if (rawUrl.startsWith("jdbc:mysql:")) {
+            driver = "com.mysql.cj.jdbc.Driver";
+        } else if (rawUrl.startsWith("jdbc:postgresql:")) {
+            driver = "org.postgresql.Driver";
         }
 
         config.setJdbcUrl(rawUrl);

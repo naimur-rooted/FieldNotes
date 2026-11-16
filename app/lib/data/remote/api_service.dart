@@ -47,48 +47,73 @@ class ApiService {
         if (_token != null) 'Authorization': 'Bearer $_token',
       };
 
+  static const _timeout = Duration(seconds: 15);
+
   Future<Map<String, dynamic>> register(String name, String email, String password) async {
-    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'name': name, 'email': email, 'password': password}));
+    final r = await http
+        .post(Uri.parse('${ApiConfig.baseUrl}/api/auth/register'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'name': name, 'email': email, 'password': password}))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception(
+                'Server timed out. The backend is waking up or temporarily unreachable. Please try again in 30 seconds.'));
     if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Register failed'));
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}));
+    final r = await http
+        .post(Uri.parse('${ApiConfig.baseUrl}/api/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'password': password}))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception(
+                'Server timed out. Render backend is waking up or unreachable. Please try again in 30 seconds.'));
     if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Login failed'));
   }
 
   Future<Map<String, dynamic>> forgotPassword(String email) async {
-    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/forgot-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email}));
+    final r = await http
+        .post(Uri.parse('${ApiConfig.baseUrl}/api/auth/forgot-password'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email}))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception(
+                'Server timed out. Render backend is waking up or unreachable.'));
     if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Failed to send verification code'));
   }
 
   Future<Map<String, dynamic>> verifyOtp(String email, String otp) async {
-    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/verify-otp'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'otp': otp}));
+    final r = await http
+        .post(Uri.parse('${ApiConfig.baseUrl}/api/auth/verify-otp'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'otp': otp}))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception(
+                'Server timed out. Render backend is waking up or unreachable.'));
     if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Verification failed'));
   }
 
   Future<Map<String, dynamic>> resetPassword(String email, String otp, String newPassword) async {
-    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}/api/auth/reset-password'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'otp': otp, 'newPassword': newPassword}));
+    final r = await http
+        .post(Uri.parse('${ApiConfig.baseUrl}/api/auth/reset-password'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'otp': otp, 'newPassword': newPassword}))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception(
+                'Server timed out. Render backend is waking up or unreachable.'));
     if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Failed to reset password'));
   }
 
   Future<List<dynamic>> getCustomers() async {
-    final r = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/customers'), headers: _headers);
+    final r = await http
+        .get(Uri.parse('${ApiConfig.baseUrl}/api/customers'), headers: _headers)
+        .timeout(_timeout,
+            onTimeout: () => throw Exception('Failed to load customers: Server timed out'));
     if (r.statusCode == 200) return jsonDecode(r.body) as List;
     throw Exception(_msg(r, 'Load customers failed'));
   }
@@ -99,7 +124,10 @@ class ApiService {
 
   Future<List<dynamic>> getSites({int? customerId}) async {
     final q = customerId == null ? '' : '?customerId=$customerId';
-    final r = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/sites$q'), headers: _headers);
+    final r = await http
+        .get(Uri.parse('${ApiConfig.baseUrl}/api/sites$q'), headers: _headers)
+        .timeout(_timeout,
+            onTimeout: () => throw Exception('Failed to load sites: Server timed out'));
     if (r.statusCode == 200) return jsonDecode(r.body) as List;
     throw Exception(_msg(r, 'Load sites failed'));
   }
@@ -114,7 +142,10 @@ class ApiService {
     if (status != null && status.isNotEmpty) params.add('status=$status');
     if (q != null && q.isNotEmpty) params.add('q=${Uri.encodeComponent(q)}');
     final qs = params.isEmpty ? '' : '?${params.join('&')}';
-    final r = await http.get(Uri.parse('${ApiConfig.baseUrl}/api/notes$qs'), headers: _headers);
+    final r = await http
+        .get(Uri.parse('${ApiConfig.baseUrl}/api/notes$qs'), headers: _headers)
+        .timeout(_timeout,
+            onTimeout: () => throw Exception('Failed to load notes: Server timed out'));
     if (r.statusCode == 200) return jsonDecode(r.body) as List;
     throw Exception(_msg(r, 'Load notes failed'));
   }
@@ -124,19 +155,28 @@ class ApiService {
   Future<void> deleteNote(int id) => _delete('/api/notes/$id');
 
   Future<Map<String, dynamic>> _post(String path, Map<String, dynamic> b) async {
-    final r = await http.post(Uri.parse('${ApiConfig.baseUrl}$path'), headers: _headers, body: jsonEncode(b));
+    final r = await http
+        .post(Uri.parse('${ApiConfig.baseUrl}$path'), headers: _headers, body: jsonEncode(b))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception('Request timed out: Server unreachable'));
     if (r.statusCode == 200 || r.statusCode == 201) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Request failed'));
   }
 
   Future<Map<String, dynamic>> _put(String path, Map<String, dynamic> b) async {
-    final r = await http.put(Uri.parse('${ApiConfig.baseUrl}$path'), headers: _headers, body: jsonEncode(b));
+    final r = await http
+        .put(Uri.parse('${ApiConfig.baseUrl}$path'), headers: _headers, body: jsonEncode(b))
+        .timeout(_timeout,
+            onTimeout: () => throw Exception('Request timed out: Server unreachable'));
     if (r.statusCode == 200) return jsonDecode(r.body) as Map<String, dynamic>;
     throw Exception(_msg(r, 'Request failed'));
   }
 
   Future<void> _delete(String path) async {
-    final r = await http.delete(Uri.parse('${ApiConfig.baseUrl}$path'), headers: _headers);
+    final r = await http
+        .delete(Uri.parse('${ApiConfig.baseUrl}$path'), headers: _headers)
+        .timeout(_timeout,
+            onTimeout: () => throw Exception('Request timed out: Server unreachable'));
     if (r.statusCode == 200 || r.statusCode == 204) return;
     throw Exception(_msg(r, 'Request failed'));
   }
