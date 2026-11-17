@@ -20,9 +20,11 @@ class LocalStore {
   }
 
   Future<void> clearAll() async {
-    await _customers.clear();
-    await _sites.clear();
-    await _notes.clear();
+    try {
+      if (Hive.isBoxOpen('customers')) await _customers.clear();
+      if (Hive.isBoxOpen('sites')) await _sites.clear();
+      if (Hive.isBoxOpen('notes')) await _notes.clear();
+    } catch (_) {}
   }
 
   // ---- Customers ----

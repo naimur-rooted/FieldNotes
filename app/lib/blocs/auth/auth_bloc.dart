@@ -81,7 +81,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
     on<AuthLogout>((e, emit) async {
       await api.clearAuth();
-      await repo.local.clearAll();
+      try {
+        await repo.local.clearAll();
+      } catch (_) {}
       emit(state.copyWith(loggedIn: false));
     });
   }
